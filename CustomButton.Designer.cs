@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.buttonTitle = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.Icon = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.Icon)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonTitle
@@ -48,38 +48,41 @@
             this.buttonTitle.TabIndex = 0;
             this.buttonTitle.Text = "buttonTitle";
             this.buttonTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonTitle.UseMnemonic = false;
             this.buttonTitle.UseVisualStyleBackColor = false;
+            this.buttonTitle.Click += new System.EventHandler(this.OnButtonClicked);
             // 
-            // pictureBox1
+            // Icon
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pictureBox1.Image = global::TV_Calendar.Properties.Resources.light_bulb_off;
-            this.pictureBox1.Location = new System.Drawing.Point(192, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(48, 48);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
+            this.Icon.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
+            this.Icon.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.Icon.Dock = System.Windows.Forms.DockStyle.Right;
+            this.Icon.Image = global::TV_Calendar.Properties.Resources.light_bulb_off;
+            this.Icon.Location = new System.Drawing.Point(192, 0);
+            this.Icon.Name = "Icon";
+            this.Icon.Size = new System.Drawing.Size(48, 48);
+            this.Icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.Icon.TabIndex = 1;
+            this.Icon.TabStop = false;
             // 
             // CustomButton
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.Icon);
             this.Controls.Add(this.buttonTitle);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "CustomButton";
             this.Size = new System.Drawing.Size(240, 48);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.EnabledChanged += new System.EventHandler(this.CustomButton_EnabledChanged);
+            ((System.ComponentModel.ISupportInitialize)(this.Icon)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Button buttonTitle;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox Icon;
+        public System.Windows.Forms.Button buttonTitle;
     }
 }

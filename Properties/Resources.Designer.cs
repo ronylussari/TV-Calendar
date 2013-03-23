@@ -73,5 +73,19 @@ namespace TV_Calendar.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        internal static System.Drawing.Bitmap light_bulb_on {
+            get {
+                object obj = ResourceManager.GetObject("light_bulb_on", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static byte[] OpenSans_ExtraBold {
+            get {
+                object obj = ResourceManager.GetObject("OpenSans_ExtraBold", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

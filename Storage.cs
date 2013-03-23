@@ -10,6 +10,7 @@ namespace TV_Calendar
         private string title_url;
         private string episode;
         private string episode_url;
+        private string type;
         private int index;
         private int lastIndex;
         private bool expand;
@@ -55,6 +56,12 @@ namespace TV_Calendar
         {
             get { return this.expand; }
             set { this.expand = value; }
+        }
+
+        public string Type
+        {
+            get { return this.type; }
+            set { this.type = value; }
         }
     }
 }

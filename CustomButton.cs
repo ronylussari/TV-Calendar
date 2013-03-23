@@ -10,41 +10,14 @@ namespace TV_Calendar
 {
     public partial class CustomButton : UserControl
     {
-
-        private int _TOP = 30;
-        private int _LEFT = 10;
-        private int _MarginV = 6;
-        private int _MarginH = 6;
-        private int _ParentWidth = 0;
+        private bool buttonState = false;
+        public delegate void ButtonClickedEventHandler(object sender, EventArgs e);
+        public event EventHandler OnUserControlButtonClicked;
 
         public CustomButton()
         {
             InitializeComponent();
             SetStyle(ControlStyles.Selectable, false);
-        }
-
-        public int ParentWidth 
-        {
-            get { return this._ParentWidth; }
-            set { this._ParentWidth = value; _LEFT = (this._ParentWidth - (4 * (240 + this.MarginH))) / 2; Console.WriteLine(this._ParentWidth); }
-        }
-
-        public int TOP 
-        {
-            get { return this._TOP; }
-            set { this._TOP = value; }
-        }
-
-        public int MarginV
-        {
-            get { return this._MarginV; }
-            set { this._MarginV = value; }
-        }
-
-        public int MarginH
-        {
-            get { return this._MarginH; }
-            set { this._MarginH = value; }
         }
 
         public string Title
@@ -53,16 +26,32 @@ namespace TV_Calendar
             set { this.buttonTitle.Text = value; }
         }
 
-        public int Row 
+        public bool ButtonState 
         {
-            get { return this.Location.Y; }
-            set { this.Location = new Point(this.Location.X, _TOP + value * (48 + _MarginV)); }
+            get { return this.buttonState; }
         }
 
-        public int Column 
+        public void SwitchOn()
         {
-            get { return this.Location.X; }
-            set { this.Location = new Point(_LEFT + value * (240 + _MarginV), this.Location.Y); }
+            this.buttonState = true;
+            this.Icon.Image = Properties.Resources.light_bulb_on;
+        }
+
+        public void SwitchOff()
+        {
+            this.buttonState = false;
+            this.Icon.Image = Properties.Resources.light_bulb_off;
+        }
+
+        private void OnButtonClicked(object sender, EventArgs e)
+        {
+            if (OnUserControlButtonClicked != null)
+                OnUserControlButtonClicked(this, e);
+        }
+
+        private void CustomButton_EnabledChanged(object sender, EventArgs e)
+        {
+            this.Dispose();
         }
 
     }

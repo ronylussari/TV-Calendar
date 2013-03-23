@@ -5,18 +5,19 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing.Text;
 
 namespace TV_Calendar
 {
     public partial class Element : UserControl
     {
+
         public Element()
         {
             InitializeComponent();
             //
             // TODO: Add constructor code after the InitializeComponent() call.
             //
-            SetStyle(ControlStyles.Selectable, false);
             this.BringToFront();
         }
 
@@ -53,16 +54,19 @@ namespace TV_Calendar
             set { episodeUrl = value; }
         }
 
+        private string type;
+        public string Type 
+        {
+            get { return type; }
+            set { type = value; }
+        }
+
         private void labelEnter(object sender, EventArgs e)
         {
             CustomLabel cl = (CustomLabel)sender;
             if (cl.Name == "titleLabel")
             {
-                cl.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            }
-            else 
-            {
-                cl.Font = new System.Drawing.Font("Tahoma", 8.55F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+                this.titleLabel.ForeColor = Color.FromArgb(255, 153, 153, 153);
             }
         }
 
@@ -71,14 +75,23 @@ namespace TV_Calendar
             CustomLabel cl = (CustomLabel)sender;
             if (cl.Name == "titleLabel")
             {
-                cl.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            }
-            else
-            {
-                cl.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            }
-        }
+                if (this.Type == "normal")
+                {
+                    this.titleLabel.ForeColor = Color.FromArgb(255, 255, 255, 255);
+                }
 
+                if (this.Type == "firstep")
+                {
+                    this.titleLabel.ForeColor = Color.FromArgb(255, 130, 202, 59);
+                }
+
+                if (this.Type == "lastep")
+                {
+                    this.titleLabel.ForeColor = Color.FromArgb(255, 204, 51, 51);
+                }
+            }
+
+        }
 
         public bool Expand
         {

@@ -12,12 +12,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Net;
-using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Specialized;
 using System.Text;
+using HtmlAgilityPack;
 
 namespace TV_Calendar
 {
@@ -32,7 +32,7 @@ namespace TV_Calendar
         private int maxElementView = 10;
         private int WorkingHeight;
         private bool ElementExpand = false;
-        //private static Stopwatch sw;
+        private int changeSpeed = 1;
 
 		public MainForm()
 		{
@@ -43,16 +43,21 @@ namespace TV_Calendar
 			//
 			// TODO: Add constructor code after the InitializeComponent() call.
 			//
-            backgroundWorker.RunWorkerAsync();
-            //sw = new Stopwatch();
-            //sw.Start();
-            moveForm();
-            this.numberLabel.Text = thisDay.Day.ToString();
-            this.dayLabel.Text = thisDay.DayOfWeek.ToString();
-            WorkingHeight = Screen.GetWorkingArea(this).Height;
-            Properties.Settings.Default.Favorites = "Arrow;Bones;Continuum;Covert Affairs;Dexter;Game of Thrones;Greys Anatomy;Grimm;Hawaii Five-0;How I Met Your Mother;Lost Girl;Mentalist [The];Merlin;New Girl;Nikita;Once Upon a Time;Teen Wolf;True Blood;Vampire Diaries [The]";
-            Properties.Settings.Default.Save();
+            //Properties.Settings.Default.Favorites = "";
+            //Properties.Settings.Default.Save();
 
+            if (Properties.Settings.Default.Favorites == "")
+            {
+            }
+            else
+            {
+                backgroundWorker.RunWorkerAsync();
+            }
+            moveForm();
+            setDate();
+            WorkingHeight = Screen.GetWorkingArea(this).Height;
+            //
+            //Properties.Settings.Default.Favorites = "Arrow;Bones;Continuum;Covert Affairs;Dexter;Game of Thrones;Greys Anatomy;Grimm;Hawaii Five-0;How I Met Your Mother;Lost Girl;The Mentalist;Merlin;New Girl;Nikita;Once Upon a Time;Teen Wolf;True Blood;The Vampire Diaries;";
 		}
 
         private void BackgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -62,40 +67,45 @@ namespace TV_Calendar
             //// There are various options, set as needed
             htmlDoc.OptionFixNestedTags = true;
 
-            htmlDoc.LoadHtml(DownloadToday());
-            HtmlNodeCollection seriesToday = htmlDoc.DocumentNode.SelectNodes("//div[@class='box930']/div[@class='contbox ovbox']");
-            Console.WriteLine(seriesToday.Count);
-            
+            htmlDoc.LoadHtml(DownloadToday("http://www.pogdesign.co.uk/cat/"));
+            HtmlNodeCollection seriesToday = htmlDoc.DocumentNode.SelectNodes("//td[@class='today']/div");
+
             if (seriesToday != null)
             {
                 elementCount = seriesToday.Count;
                 char[] delimiterChars = { ';' };
                 int licz = 0;
+                
                 List<int> Index = new List<int>();
                 List<string> Title = new List<string>();
                 List<string> TitleUrl = new List<string>();
                 List<string> Episode = new List<string>();
                 List<string> EpisodeUrl = new List<string>();
+                List<string> Type = new List<string>();
+
                 for (int index = 0; index < elementCount; index++)
                 {
-
-                    string title = correctTitle(seriesToday[index].SelectSingleNode("h4").InnerText.Trim());
-                    if(Array.Exists(Properties.Settings.Default.Favorites.Split(delimiterChars), delegate(string s) { return s.Equals(title); })!=false)
+                    HtmlNode p = seriesToday[index].SelectSingleNode("p");
+                    string title = correctTitle(p.SelectSingleNode("a[1]").InnerText.Trim());
+                    if (Array.Exists(Properties.Settings.Default.Favorites.Split(delimiterChars), delegate(string s) { return s.Equals(title); }) != false)
                     {
                         Index.Add(licz);
                         Title.Add(title);
-                        TitleUrl.Add(getSeriesUrl(seriesToday[index].SelectSingleNode("h4/a")));
-                        Episode.Add(correctEpisode(seriesToday[index].SelectSingleNode("h5/a/span").InnerText.Trim()));
-                        EpisodeUrl.Add(getEpisodeUrl(seriesToday[index].SelectSingleNode("h5/a")));
+                        TitleUrl.Add(getSeriesUrl(p.SelectSingleNode("a[1]")));
+                        Episode.Add(p.SelectSingleNode("a[2]").InnerText.Trim());
+                        EpisodeUrl.Add(getEpisodeUrl(p.SelectSingleNode("a[2]")));
+                        Type.Add(p.GetAttributeValue("class", "normal"));
                         licz++;
                     }
                 }
 
                 if (licz > 6)
                 {
-                    if ((licz * 50 + 100) > getMaxHeight())
+                    if ((licz * 38 + 100) > getMaxHeight())
                     {
-                        maxElementView = getMaxHeight() / 50;
+                        maxElementView = (getMaxHeight()-100) / 38;
+                        ElementExpand = false;
+                        changeSpeed = 2;
                     }
                     else
                     {
@@ -120,9 +130,16 @@ namespace TV_Calendar
                     storageTv.Episode = Episode[index];
                     storageTv.EpisodeUrl = EpisodeUrl[index];
                     storageTv.Expand = ElementExpand;
+                    storageTv.Type = Type[index];
+
                     backgroundWorker.ReportProgress(index, storageTv);
                 }
+                
 
+            }
+            else 
+            {
+                Console.WriteLine("html => NULL");
             }
             
         }
@@ -140,8 +157,21 @@ namespace TV_Calendar
             el.EpisodeUrl = sTv.EpisodeUrl;
 
             el.Index = sTv.Index;
-            el.Location = new Point(0, (sTv.Index * 51)/1 + 38);
+            el.Location = new Point(0, (sTv.Index * 38) / 1 + 38);
             el.Expand = sTv.Expand;
+            el.Type = sTv.Type;
+
+            if (sTv.Type == "lastep")
+            {
+                el.titleLabel.ForeColor = Color.FromArgb(255, 204, 51, 51);
+                el.episodeLabel.ForeColor = Color.FromArgb(255,204,51,51);
+            }
+
+            if (sTv.Type == "firstep")
+            {
+                el.titleLabel.ForeColor = Color.FromArgb(255, 130, 202, 59);
+                el.episodeLabel.ForeColor = Color.FromArgb(255, 130, 202, 59);
+            }
 
             if (sTv.Index % 2 == 0)
             {
@@ -154,17 +184,39 @@ namespace TV_Calendar
             el.titleLabel.Click += (sender, e) => openSeries(sender, e, el.TitleUrl);
             el.episodeLabel.Click += (sender, e) => openSeries(sender, e, el.EpisodeUrl);
             this.Controls.Add(el);
+
         }
 
         private void BackgroundWorker_Completed(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            if (ElementExpand != true)
+            {
+                this.arrowIcon1.Location = new Point(208, 0);
+                this.AutoScroll = true;
+            }
             ChangeSize();
-            moveForm();
-            //sw.Stop();
-            //MessageBox.Show("Seconds => " + sw.Elapsed.Seconds);
         }
 
-        public string correctTitle(string s) 
+        private void setDate()
+        {
+            int day = thisDay.Day;
+            switch (day) 
+            {
+                case 1: case 21: case 31:
+                    this.thLabel.Text = "st";
+                    break;
+                case 2: case 22:
+                    this.thLabel.Text = "nd";
+                    break;
+                case 3: case 23:
+                    this.thLabel.Text = "rd";
+                    break;
+            }
+            this.numberLabel.Text = day.ToString();
+            this.dayLabel.Text = thisDay.DayOfWeek.ToString();
+        }
+
+        private string correctTitle(string s) 
         {
             if (s.IndexOf("Summary") != -1)
             {
@@ -176,7 +228,7 @@ namespace TV_Calendar
             }
         }
 
-        public string correctEpisode(string s)
+        private string correctEpisode(string s)
         {
             Match match = Regex.Match(s, @"^Season (?<season>\w+), Episode (?<episode>\w+)",
         RegexOptions.IgnoreCase);
@@ -190,22 +242,28 @@ namespace TV_Calendar
             }
         }
 
-        public string getSeriesUrl(HtmlNode n) 
+        private string getSeriesUrl(HtmlNode n) 
         {
             //System.Diagnostics.Debug.WriteLine(n.GetAttributeValue("href", ""));
             return "http://www.pogdesign.co.uk" + n.GetAttributeValue("href", "");
         }
 
-        public string getEpisodeUrl(HtmlNode n)
+        private string getEpisodeUrl(HtmlNode n)
         {
             return "http://www.pogdesign.co.uk" + n.GetAttributeValue("href", "");
         }
-
+        
         private void ChangeSize()
         {
             // Element * height + topH + footer
-            int WIN_H = 38 + (maxElementView) * 51;
-            this.ClientSize = new Size(265,WIN_H);
+            int WIN_H = 38 + (maxElementView) * 38;
+            moveForm(WIN_H);
+            //this.ClientSize = new Size(265,WIN_H);
+            while (this.ClientSize.Height < WIN_H) 
+            {
+                this.ClientSize = new Size(265, this.ClientSize.Height + changeSpeed);
+                Application.DoEvents();
+            }
         }
 
         private int getMaxHeight()
@@ -222,7 +280,7 @@ namespace TV_Calendar
             }
             string doc = string.Empty;
             WebClient client = new WebClient();
-
+            client.Proxy = null;
             try
             {
                 client.Headers.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -242,7 +300,17 @@ namespace TV_Calendar
             {
                 doc = client.DownloadString(url);
             }
-            return doc;
+
+            if (doc == null || doc == string.Empty)
+            {
+                MessageBox.Show("Error: Html content is null!");
+                return null;
+            }
+            else
+            {
+                return doc;
+            }
+            
         }
 
         private void moveForm()
@@ -250,6 +318,21 @@ namespace TV_Calendar
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width - 10,
                           workingArea.Bottom - Size.Height - 10);
+        }
+
+        private void moveForm(int h)
+        {
+            //int difH = Size.Height + h;
+            Rectangle workingArea = Screen.GetWorkingArea(this);
+            //this.Location = new Point(workingArea.Right - Size.Width - 10,
+                          //workingArea.Bottom - Size.Height - 10 - h + 38);
+            Point p = new Point(workingArea.Right - Size.Width - 10, workingArea.Bottom - Size.Height - 10 - h + 38);
+
+            while (this.Location.Y > p.Y)
+            {
+                this.Location = new Point(this.Location.X, this.Location.Y - changeSpeed);
+                Application.DoEvents();
+            }
         }
 
         private static string generateTodayUrl()
@@ -318,21 +401,22 @@ namespace TV_Calendar
             }
         }
 
-        private void wIDTHToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine("WIN_W => " + this.Width);
-            MessageBox.Show(""+this.maxElementView);
-        }
-
-        private void hEIGHTToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine("WIN_H => " + this.Height);
-        }
-
         private void MainForm_MouseWheel(object sender, MouseEventArgs e)
         {
             // preventing scrollbar jumping
             this.Activate();
+        }
+
+        private void arrowEnter(object sender, EventArgs e)
+        {
+            arrowIcon1.ForeColor = Color.FromArgb(255, 255, 255, 255);
+            arrowIcon1.Invalidate();
+        }
+
+        private void arrowLeave(object sender, EventArgs e)
+        {
+            arrowIcon1.ForeColor = Color.FromArgb(255, 74, 74, 74);
+            arrowIcon1.Invalidate();
         }
 
     }
